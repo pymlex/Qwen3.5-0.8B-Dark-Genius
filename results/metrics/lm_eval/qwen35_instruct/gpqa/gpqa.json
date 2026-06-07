@@ -1,0 +1,11 @@
+{
+  "model_key": "qwen35_instruct",
+  "benchmark": "gpqa",
+  "metric_name": "exact_match,flexible-extract",
+  "value": 0.3169642857142857,
+  "raw_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/lm_eval/qwen35_instruct/gpqa/Qwen__Qwen3.5-0.8B/results_2026-06-07T20-24-40.727394.json",
+  "canonical_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/metrics/lm_eval/qwen35_instruct/gpqa/lm_eval_results.json",
+  "command": "lm_eval --model hf --model_args pretrained=Qwen/Qwen3.5-0.8B,trust_remote_code=True,dtype=float16 --tasks gpqa_main_generative_n_shot --num_fewshot 5 --batch_size 8 --seed 42 --output_path /root/Qwen3.5-0.8B-Dark-Genius/results/raw/lm_eval/qwen35_instruct/gpqa --log_samples --gen_kwargs {\"temperature\": 0.0, \"do_sample\": false, \"max_gen_toks\": 1024} --device cuda:0",
+  "task": "gpqa_main_generative_n_shot",
+  "gpqa_access_url": "https://huggingface.co/datasets/Idavidrein/gpqa"
+}

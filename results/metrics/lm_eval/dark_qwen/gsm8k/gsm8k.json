@@ -1,0 +1,10 @@
+{
+  "model_key": "dark_qwen",
+  "benchmark": "gsm8k",
+  "metric_name": "exact_match,flexible-extract",
+  "value": 0.3434420015163002,
+  "raw_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/lm_eval/dark_qwen/gsm8k/samueljayasingh__DarkQwen3_5_0_8B/results_2026-06-07T21-34-51.133638.json",
+  "canonical_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/metrics/lm_eval/dark_qwen/gsm8k/lm_eval_results.json",
+  "command": "lm_eval --model hf --model_args pretrained=samueljayasingh/DarkQwen3_5_0_8B,trust_remote_code=True,dtype=float16 --tasks gsm8k --num_fewshot 5 --batch_size 8 --seed 42 --output_path /root/Qwen3.5-0.8B-Dark-Genius/results/raw/lm_eval/dark_qwen/gsm8k --log_samples --gen_kwargs {\"temperature\": 0.0, \"do_sample\": false, \"max_gen_toks\": 1024} --device cuda:0",
+  "task": "gsm8k"
+}

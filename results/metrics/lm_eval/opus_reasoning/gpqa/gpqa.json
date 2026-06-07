@@ -1,0 +1,11 @@
+{
+  "model_key": "opus_reasoning",
+  "benchmark": "gpqa",
+  "metric_name": "exact_match,flexible-extract",
+  "value": 0.3125,
+  "raw_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/lm_eval/opus_reasoning/gpqa/Ishant06__Qwen3.5-0.8B-Claude-4.6-Opus-Reasoning-Distilled/results_2026-06-07T20-56-34.039472.json",
+  "canonical_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/metrics/lm_eval/opus_reasoning/gpqa/lm_eval_results.json",
+  "command": "lm_eval --model hf --model_args pretrained=Ishant06/Qwen3.5-0.8B-Claude-4.6-Opus-Reasoning-Distilled,trust_remote_code=True,dtype=float16 --tasks gpqa_main_generative_n_shot --num_fewshot 5 --batch_size 8 --seed 42 --output_path /root/Qwen3.5-0.8B-Dark-Genius/results/raw/lm_eval/opus_reasoning/gpqa --log_samples --gen_kwargs {\"temperature\": 0.0, \"do_sample\": false, \"max_gen_toks\": 1024} --device cuda:0",
+  "task": "gpqa_main_generative_n_shot",
+  "gpqa_access_url": "https://huggingface.co/datasets/Idavidrein/gpqa"
+}

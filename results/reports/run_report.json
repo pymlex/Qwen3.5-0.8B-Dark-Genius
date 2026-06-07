@@ -1,0 +1,49 @@
+{
+  "hardware": "1\u00d7 RTX 5090 31.84 GB VRAM, PCIe 1.0 x16, CUDA 13.2, AMD Ryzen 9 9950X3D 16-Core 4.3 GHz, 64 GB RAM",
+  "models": [
+    {
+      "model_key": "qwen35_instruct",
+      "display_name": "Qwen3.5-0.8B Instruct",
+      "gpqa_accuracy": 0.3169642857142857,
+      "gsm8k_exact_match": 0.3366186504927976,
+      "harmbench_asr": null,
+      "refusal_rate": null
+    },
+    {
+      "model_key": "opus_reasoning",
+      "display_name": "Opus Reasoning Distilled",
+      "gpqa_accuracy": 0.3125,
+      "gsm8k_exact_match": 0.37680060652009095,
+      "harmbench_asr": null,
+      "refusal_rate": null
+    },
+    {
+      "model_key": "dark_qwen",
+      "display_name": "DarkQwen3.5-0.8B",
+      "gpqa_accuracy": 0.30357142857142855,
+      "gsm8k_exact_match": 0.3434420015163002,
+      "harmbench_asr": null,
+      "refusal_rate": null
+    },
+    {
+      "model_key": "dark_genius",
+      "display_name": "Qwen3.5-0.8B-Dark-Genius",
+      "gpqa_accuracy": 0.296875,
+      "gsm8k_exact_match": 0.3639120545868082,
+      "harmbench_asr": null,
+      "refusal_rate": null
+    }
+  ],
+  "library_versions": {
+    "torch": "2.11.0",
+    "transformers": "5.10.2",
+    "safetensors": "0.7.0",
+    "lm_eval": "0.4.12",
+    "datasets": "5.0.0",
+    "accelerate": "1.13.0",
+    "vllm": "0.22.1",
+    "numpy": "2.3.5",
+    "matplotlib": "3.10.9",
+    "seaborn": "0.13.2"
+  }
+}
