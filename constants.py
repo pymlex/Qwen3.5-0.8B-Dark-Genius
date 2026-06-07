@@ -59,6 +59,8 @@ INFERENCE_POLICY = {
     "seed": SEED,
 }
 
+LM_EVAL_BATCH_SIZE = 8
+
 LM_EVAL_TASKS = {
     "gpqa": {
         "task": "gpqa_main_generative_n_shot",

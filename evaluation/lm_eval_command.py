@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from constants import INFERENCE_POLICY, SEED
+from constants import INFERENCE_POLICY, LM_EVAL_BATCH_SIZE, SEED
 
 
 def build_lm_eval_command(
@@ -22,7 +22,7 @@ def build_lm_eval_command(
         "--num_fewshot",
         str(task_spec["num_fewshot"]),
         "--batch_size",
-        "auto",
+        str(LM_EVAL_BATCH_SIZE),
         "--device",
         "cuda:0",
         "--seed",

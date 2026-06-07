@@ -1,3 +1,4 @@
+batch_size: 8
 gpqa:
   task: gpqa_main_generative_n_shot
   metric_key: "exact_match,flexible-extract"
