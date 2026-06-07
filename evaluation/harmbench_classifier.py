@@ -9,7 +9,12 @@ from tqdm.auto import tqdm
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
-from constants import HARMBENCH_CLASSIFIER_GPU_UTIL, HARMBENCH_CLASSIFIER_ID
+from constants import (
+    HARMBENCH_CLASSIFIER_BATCH_SIZE,
+    HARMBENCH_CLASSIFIER_GPU_UTIL,
+    HARMBENCH_CLASSIFIER_ID,
+    HARMBENCH_CLASSIFIER_MAX_MODEL_LEN,
+)
 from evaluation.harmbench_prompts import LLAMA2_CLS_PROMPT
 
 
@@ -48,6 +53,20 @@ def release_cuda_memory() -> None:
         torch.cuda.empty_cache()
 
 
+def build_classifier_prompt(behavior_dict: dict, entry: dict) -> str:
+    tags = behavior_dict["Tags"].split(", ")
+    if "context" in tags:
+        return LLAMA2_CLS_PROMPT["prompt_contextual"].format(
+            behavior=behavior_dict["Behavior"],
+            generation=entry["generation"],
+            context=behavior_dict["ContextString"],
+        )
+    return LLAMA2_CLS_PROMPT["prompt"].format(
+        behavior=behavior_dict["Behavior"],
+        generation=entry["generation"],
+    )
+
+
 def classify_completions(
     behaviors_path: Path,
     completions_path: Path,
@@ -62,47 +81,45 @@ def classify_completions(
     completions = clip_completions(completions, classifier_id, num_tokens)
     release_cuda_memory()
 
+    print(
+        f"Loading HarmBench classifier: {classifier_id} "
+        f"(max_model_len={HARMBENCH_CLASSIFIER_MAX_MODEL_LEN})",
+        flush=True,
+    )
     cls = LLM(
         model=classifier_id,
         tensor_parallel_size=1,
         gpu_memory_utilization=HARMBENCH_CLASSIFIER_GPU_UTIL,
+        max_model_len=HARMBENCH_CLASSIFIER_MAX_MODEL_LEN,
+        enforce_eager=True,
     )
     cls.llm_engine.tokenizer.tokenizer.truncation_side = "left"
     cls_params = SamplingParams(temperature=0.0, max_tokens=1)
 
-    results = {}
-    for behavior_id, entries in tqdm(completions.items(), desc="harmbench-classifier"):
+    jobs: list[tuple[str, dict]] = []
+    for behavior_id, entries in completions.items():
         behavior_dict = behaviors[behavior_id]
-        tags = behavior_dict["Tags"].split(", ")
-        if "context" in tags:
-            context_string = behavior_dict["ContextString"]
-            inputs = [
-                LLAMA2_CLS_PROMPT["prompt_contextual"].format(
-                    behavior=behavior_dict["Behavior"],
-                    generation=entry["generation"],
-                    context=context_string,
-                )
-                for entry in entries
-            ]
-        else:
-            inputs = [
-                LLAMA2_CLS_PROMPT["prompt"].format(
-                    behavior=behavior_dict["Behavior"],
-                    generation=entry["generation"],
-                )
-                for entry in entries
-            ]
+        for entry in entries:
+            jobs.append((behavior_id, entry, build_classifier_prompt(behavior_dict, entry)))
 
-        outputs = cls.generate(inputs, cls_params, use_tqdm=False)
-        preds = [output.outputs[0].text for output in outputs]
+    print(f"Classifying {len(jobs)} completions...", flush=True)
+    preds: list[str] = []
+    batch_size = HARMBENCH_CLASSIFIER_BATCH_SIZE
+    for start in tqdm(
+        range(0, len(jobs), batch_size),
+        desc="harmbench-classifier",
+        unit="batch",
+    ):
+        batch_prompts = [job[2] for job in jobs[start : start + batch_size]]
+        outputs = cls.generate(batch_prompts, cls_params, use_tqdm=False)
+        preds.extend(output.outputs[0].text for output in outputs)
 
-        current_results = []
-        for entry, pred in zip(entries, preds):
-            label = int(pred.lower() == "yes") if pred.lower() in {"yes", "no"} else -1
-            scored = dict(entry)
-            scored["label"] = label
-            current_results.append(scored)
-        results[behavior_id] = current_results
+    results: dict[str, list[dict]] = {}
+    for (behavior_id, entry, _), pred in zip(jobs, preds):
+        label = int(pred.lower() == "yes") if pred.lower() in {"yes", "no"} else -1
+        scored = dict(entry)
+        scored["label"] = label
+        results.setdefault(behavior_id, []).append(scored)
 
     del cls
     release_cuda_memory()

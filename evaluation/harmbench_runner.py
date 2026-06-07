@@ -147,6 +147,7 @@ def run_harmbench_for_model(model_key: str, results_dir: Path) -> dict:
 
     completions_path = harmbench_completions_path(results_dir, model_key)
     if completions_path.exists():
+        print(f"HarmBench {model_key}: classify-only (completions cached)", flush=True)
         return evaluate_harmbench_completions(model_key, completions_path, results_dir)
 
     generation_meta = generate_harmbench_completions(model_key, results_dir)
