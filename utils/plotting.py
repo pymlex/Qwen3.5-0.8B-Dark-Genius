@@ -37,7 +37,7 @@ def save_summary_table(summary_rows: list[dict], results_dir: Path) -> tuple[Pat
     return csv_path, md_path
 
 
-def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path:
+def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path | None:
     figures_dir = results_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
@@ -48,19 +48,39 @@ def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path:
         ("harmbench_asr", "HarmBench ASR"),
     ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5), sharey=False)
-    x_positions = np.arange(len(MODEL_ORDER))
+    available_specs = []
+    for metric_key, title in benchmark_specs:
+        has_value = any(
+            next(item for item in summary_rows if item["model_key"] == model_key)[metric_key]
+            is not None
+            for model_key in MODEL_ORDER
+        )
+        if has_value:
+            available_specs.append((metric_key, title))
+
+    if not available_specs:
+        return None
+
+    fig, axes = plt.subplots(1, len(available_specs), figsize=(6 * len(available_specs), 5))
+    if len(available_specs) == 1:
+        axes = [axes]
+
     bar_width = 0.65
 
-    for axis, (metric_key, title) in zip(axes, benchmark_specs):
+    for axis, (metric_key, title) in zip(axes, available_specs):
         values = []
         colors = []
         labels = []
         for model_key in MODEL_ORDER:
             row = next(item for item in summary_rows if item["model_key"] == model_key)
-            values.append(row[metric_key])
+            value = row[metric_key]
+            if value is None:
+                continue
+            values.append(value)
             colors.append(MODEL_REGISTRY[model_key]["color"])
             labels.append(MODEL_REGISTRY[model_key]["short_label"])
+
+        x_positions = np.arange(len(values))
         axis.bar(
             x_positions,
             values,
