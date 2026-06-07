@@ -1,0 +1,8 @@
+temperature: 0.0
+do_sample: false
+top_p: 1.0
+seed: 42
+system_prompt: "You are a helpful assistant."
+dtype: float16
+trust_remote_code: true
+batch_size: 4

@@ -1,0 +1,16 @@
+merge_method: dare_ties
+base_model: Qwen/Qwen3.5-0.8B
+dtype: float16
+tokenizer_source: base
+models:
+  - model: Ishant06/Qwen3.5-0.8B-Claude-4.6-Opus-Reasoning-Distilled
+    parameters:
+      weight: 1.0
+      density: 0.5
+  - model: samueljayasingh/DarkQwen3_5_0_8B
+    parameters:
+      weight: 1.0
+      density: 0.5
+parameters:
+  normalize: true
+  int8_mask: true
