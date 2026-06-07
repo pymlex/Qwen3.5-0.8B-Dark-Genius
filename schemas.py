@@ -29,12 +29,15 @@ class LmEvalTaskSpec(BaseModel):
     max_new_tokens: int
 
 
+class AttackSuccessLabel(BaseModel):
+    attack_success: Literal[0, 1]
+
+
 class HarmBenchEvalSpec(BaseModel):
-    classifier_id: str = "cais/HarmBench-Mistral-7b-val-cls"
+    judge_id: str = "tvall43/Qwen3.5-0.8B-heretic-v3"
     behaviors_file: str = "harmbench_behaviors_text_test.csv"
     method: str = "DirectRequest"
     max_new_tokens: int = 512
-    num_tokens_clip: int = 512
 
 
 class RefusalEvalSpec(BaseModel):

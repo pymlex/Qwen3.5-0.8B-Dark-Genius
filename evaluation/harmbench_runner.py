@@ -6,8 +6,8 @@ from tqdm.auto import tqdm
 
 from constants import (
     HARMBENCH_BEHAVIORS_FILE,
-    HARMBENCH_CLASSIFIER_ID,
     HARMBENCH_DATA_DIR,
+    HARMBENCH_JUDGE_ID,
     HARMBENCH_MAX_NEW_TOKENS,
     HARMBENCH_METHOD,
     INFERENCE_POLICY,
@@ -20,7 +20,7 @@ from evaluation.benchmark_status import (
     is_harmbench_done,
     load_summary,
 )
-from evaluation.harmbench_classifier import classify_completions, release_cuda_memory
+from evaluation.harmbench_judge import classify_completions, release_cuda_memory
 from utils.env_utils import require_hf_token
 from utils.inference import generate_responses
 from utils.model_loader import resolve_model_path
@@ -106,19 +106,12 @@ def evaluate_harmbench_completions(
     completions_path: Path,
     results_dir: Path,
 ) -> dict:
-    results_path = results_dir / "raw" / "harmbench" / model_key / "classifier_results.json"
-    command = (
-        f"python -m evaluation.harmbench_classifier classify_completions "
-        f"--behaviors_path {behaviors_path()} "
-        f"--completions_path {completions_path} "
-        f"--save_path {results_path}"
-    )
+    results_path = results_dir / "raw" / "harmbench" / model_key / "judge_results.json"
     release_cuda_memory()
     classification = classify_completions(
-        behaviors_path=behaviors_path(),
         completions_path=completions_path,
         save_path=results_path,
-        classifier_id=HARMBENCH_CLASSIFIER_ID,
+        judge_id=HARMBENCH_JUDGE_ID,
     )
 
     summary = {
@@ -126,13 +119,13 @@ def evaluate_harmbench_completions(
         "benchmark": "harmbench",
         "metric_name": "attack_success_rate",
         "value": classification["attack_success_rate"],
-        "classifier_id": HARMBENCH_CLASSIFIER_ID,
+        "judge_id": HARMBENCH_JUDGE_ID,
         "method": HARMBENCH_METHOD,
         "behaviors_file": HARMBENCH_BEHAVIORS_FILE,
         "num_behaviors": classification["num_behaviors"],
         "raw_path": str(results_path),
         "completions_path": str(completions_path),
-        "command": command,
+        "command": f"python main.py evaluate-harmbench --model {model_key}",
     }
     summary_path = results_dir / "metrics" / "harmbench" / model_key / "summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
@@ -147,7 +140,7 @@ def run_harmbench_for_model(model_key: str, results_dir: Path) -> dict:
 
     completions_path = harmbench_completions_path(results_dir, model_key)
     if completions_path.exists():
-        print(f"HarmBench {model_key}: classify-only (completions cached)", flush=True)
+        print(f"HarmBench {model_key}: judge-only (completions cached)", flush=True)
         return evaluate_harmbench_completions(model_key, completions_path, results_dir)
 
     generation_meta = generate_harmbench_completions(model_key, results_dir)

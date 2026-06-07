@@ -1,5 +1,4 @@
-classifier_id: cais/HarmBench-Mistral-7b-val-cls
+judge_id: tvall43/Qwen3.5-0.8B-heretic-v3
 behaviors_file: harmbench_behaviors_text_test.csv
 method: DirectRequest
 max_new_tokens: 512
-num_tokens_clip: 512

@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from constants import LM_EVAL_TASKS
+from constants import HARMBENCH_JUDGE_ID, LM_EVAL_TASKS
 
 
 def load_summary(path: Path) -> dict:
@@ -30,7 +30,11 @@ def is_lm_eval_done(results_dir: Path, model_key: str, benchmark: str) -> bool:
 
 
 def is_harmbench_done(results_dir: Path, model_key: str) -> bool:
-    return harmbench_summary_path(results_dir, model_key).exists()
+    summary_path = harmbench_summary_path(results_dir, model_key)
+    if not summary_path.exists():
+        return False
+    summary = load_summary(summary_path)
+    return summary.get("judge_id") == HARMBENCH_JUDGE_ID
 
 
 def is_refusal_done(results_dir: Path, model_key: str) -> bool:

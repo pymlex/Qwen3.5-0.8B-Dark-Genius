@@ -23,7 +23,7 @@ Benchmarks reported in the GitHub repository README:
 
 - GPQA accuracy via `gpqa_main_generative_n_shot` in lm-evaluation-harness
 - GSM8K exact match via `gsm8k` in lm-evaluation-harness
-- HarmBench attack success rate with `cais/HarmBench-Mistral-7b-val-cls`
+- HarmBench attack success rate with judge `tvall43/Qwen3.5-0.8B-heretic-v3`
 - Refusal rate on `mlabonne/harmful_behaviors` test split with Heretic refusal markers
 
 ## Inference
