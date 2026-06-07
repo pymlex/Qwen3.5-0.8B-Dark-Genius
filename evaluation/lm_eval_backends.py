@@ -12,7 +12,7 @@ def build_vllm_model_args(model_path: str) -> str:
     return (
         f"pretrained={model_path},trust_remote_code=True,dtype=float16,"
         f"gpu_memory_utilization={LM_EVAL_GPU_MEMORY_UTILIZATION},"
-        f"max_model_len={LM_EVAL_MAX_MODEL_LEN},language_model_only=True"
+        f"max_model_len={LM_EVAL_MAX_MODEL_LEN}"
     )
 
 
