@@ -6,8 +6,9 @@ cd "$ROOT_DIR"
 
 if [[ ! -f .env ]]; then
   cp .env.example .env
-  echo "Created .env from .env.example. Set HF_TOKEN before running merge or evaluation."
 fi
+
+echo "Copy .env.example to .env and set HF_TOKEN."
 
 python -m pip install -U pip
 python -m pip install -r requirements.txt

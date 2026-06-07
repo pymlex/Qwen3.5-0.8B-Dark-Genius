@@ -58,27 +58,27 @@ flowchart TB
 
 ## DARE-TIES merge
 
-Let $\theta_{\mathrm{base}}$ denote the shared base weights of Qwen/Qwen3.5-0.8B. For each fine-tuned checkpoint $\theta_i$ define the task vector
+Let $\theta_b$ denote the shared base weights of Qwen/Qwen3.5-0.8B. For each fine-tuned checkpoint $\theta_i$ define the task vector
 
-$$\tau_i = \theta_i - \theta_{\mathrm{base}}.$$
+$$\tau_i = \theta_i - \theta_b.$$
 
-DARE applies element-wise random pruning with retain probability $p_i$, equivalently drop rate $1 - p_i$, controlled by mergekit parameter `density`. Draw mask $m_i \sim \mathrm{Bernoulli}(p_i)$ element-wise and form the pruned vector
+DARE applies element-wise random pruning with retain probability $p_i$, equivalently drop rate $1 - p_i$, controlled by mergekit parameter `density`. Draw mask $m_i$ element-wise from Bernoulli$(p_i)$ and form the pruned vector
 
 $$\tilde{\tau}_i = \frac{m_i \odot \tau_i}{p_i}.$$
 
 The rescaling factor $1/p_i$ preserves the expected magnitude of each retained coordinate and stabilises the merged update when several adapters are combined.
 
-TIES resolves sign conflicts before averaging. Stack masked vectors $\{\tilde{\tau}_i\}$. For each parameter coordinate collect contributing signs $\mathrm{sign}(\tilde{\tau}_{i,k})$. The consensus sign is
+TIES resolves sign conflicts before averaging. Stack masked vectors $\tilde{\tau}_1, \ldots, \tilde{\tau}_n$. For each parameter index $k$ form the coordinate sum
 
-$$s_k = \mathrm{sign}\left(\sum_i \tilde{\tau}_{i,k}\right).$$
+$$S_k = \sum_i \tilde{\tau}_{i,k}.$$
 
-Coordinates whose sign disagrees with $s_k$ are zeroed. Let $\mathrm{TIES}(\cdot)$ denote this sign-election and conflict-resolution map. With normalised merge weights $w_i$,
+The consensus sign $s_k$ matches the sign of $S_k$. Coordinates whose sign disagrees with $s_k$ are zeroed. Let $\tilde{\tau}_i^{\ast}$ denote the sign-resolved masked vector. With normalised merge weights $w_i$,
 
-$$\tau_{\mathrm{merged}} = \lambda \sum_i w_i \, \mathrm{TIES}(\tilde{\tau}_i).$$
+$$\tau_m = \lambda \sum_i w_i \, \tilde{\tau}_i^{\ast}.$$
 
 DARE-TIES applies DARE pruning first and TIES consensus second. The merged checkpoint is
 
-$$\theta_{\mathrm{merged}} = \theta_{\mathrm{base}} + \tau_{\mathrm{merged}}.$$
+$$\theta_m = \theta_b + \tau_m.$$
 
 ### Why DARE-TIES
 
@@ -133,9 +133,9 @@ Official evaluation uses a classifier over model completions. Recipe in this rep
 | Completion clip | $512$ tokens before classification |
 | Metric | mean behaviour-level ASR |
 
-Per behaviour $b$ with completion $y_b$ and classifier label $\ell_b \in \{0,1\}$,
+Per behaviour $b$ with completion $y_b$ and classifier label $\ell_b \in \lbrace 0, 1 \rbrace$,
 
-$$\mathrm{ASR}_b = \frac{1}{|y_b|}\sum_{j} \ell_{b,j}.$$
+$$\text{ASR}_b = \frac{1}{|y_b|}\sum_{j} \ell_{b,j}.$$
 
 Reported HarmBench score is the unweighted mean over behaviours in the test CSV.
 
@@ -143,7 +143,7 @@ Reported HarmBench score is the unweighted mean over behaviours in the test CSV.
 
 Aligned with [Heretic](https://github.com/p-e-w/heretic). Prompts: `mlabonne/harmful_behaviors`, split `test[:100]`, column `text`. A response is a refusal when any marker from the Heretic default list occurs as a case-insensitive substring after normalisation. Empty responses count as refusals.
 
-$$\mathrm{RefusalRate} = \frac{N_{\mathrm{refusal}}}{N_{\mathrm{total}}}.$$
+$$R_{\text{refusal}} = \frac{N_{\text{refusal}}}{N_{\text{total}}}.$$
 
 ## Project layout
 
@@ -182,7 +182,7 @@ cd Qwen3.5-0.8B-Dark-Genius
 bash scripts/install.sh
 ```
 
-Copy `.env.example` to `.env` and set `HF_TOKEN`. Optional: `GH_TOKEN`, `GITHUB_NAME`, `GITHUB_EMAIL`.
+`install.sh` copies `.env.example` to `.env`. Set `HF_TOKEN` in `.env` before merge or evaluation. Optional: `GH_TOKEN`, `GITHUB_NAME`, `GITHUB_EMAIL`.
 
 Authenticate Hugging Face and GitHub:
 
@@ -262,15 +262,55 @@ Experiments target Google Colab L4 GPU. After `python main.py report`, numeric s
 
 Values populate after the Colab run. Raw completions, parsed metrics, merge metadata, and exact shell commands are stored under `results/raw/` and `results/metrics/`.
 
+## Inference
+
+Load pymlex/Qwen3.5-0.8B-Dark-Genius from Hugging Face and run greedy chat generation with the Qwen3.5 tokenizer template. `enable_thinking` is disabled to match the evaluation policy.
+
+```python
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model_id = "pymlex/Qwen3.5-0.8B-Dark-Genius"
+tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    trust_remote_code=True,
+    torch_dtype=torch.float16,
+    device_map="auto",
+)
+
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is 84 * 3 / 2?"},
+]
+prompt = tokenizer.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True,
+    enable_thinking=False,
+)
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+outputs = model.generate(
+    **inputs,
+    max_new_tokens=256,
+    temperature=0.0,
+    do_sample=False,
+)
+answer = tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1] :], skip_special_tokens=True)
+print(answer)
+```
+
 ## Citation
 
+If you found this project useful, please cite it as:
+
 ```bibtex
-@software{zyukov2026darkgenius,
-  author  = {Zyukov, Alex},
-  title   = {{Qwen3.5-0.8B-Dark-Genius}: DARE-TIES merge and safety-capability benchmarking on Qwen3.5-0.8B},
-  year    = {2026},
-  url     = {https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius},
-  note    = {Hugging Face model pymlex/Qwen3.5-0.8B-Dark-Genius}
+@misc{zyukov2026darkgenius,
+  title         = {{Qwen3.5-0.8B-Dark-Genius}: DARE-TIES merge and safety-capability benchmarking on Qwen3.5-0.8B},
+  author        = {Zyukov, Alex},
+  year          = {2026},
+  url           = {https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius},
+  note          = {Hugging Face model pymlex/Qwen3.5-0.8B-Dark-Genius}
 }
 ```
 
@@ -279,53 +319,67 @@ The project is under GPL-3.0 license.
 ## References
 
 ```bibtex
-@article{yu2024dare,
-  title={Language Models are Super Mario: Absorbing Abilities from Homologous Models as a Free Lunch},
-  author={Yu, Le and Yu, Bowen and Yu, Haiyang and Huang, Fei and Li, Yongbin},
-  journal={arXiv preprint arXiv:2311.03099},
-  year={2024}
+@misc{yu2024dare,
+  title         = {Language Models are Super Mario: Absorbing Abilities from Homologous Models as a Free Lunch},
+  author        = {Le Yu and Bowen Yu and Haiyang Yu and Fei Huang and Yongbin Li},
+  year          = {2024},
+  eprint        = {2311.03099},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2311.03099}
 }
 
-@article{yadav2023ties,
-  title={TIES-Merging: Resolving Interference When Merging Models},
-  author={Yadav, Prateek Yadav and Tam, Derek and Choshen, Leshem and Raffel, Colin and Bansal, Mohit},
-  journal={arXiv preprint arXiv:2306.01708},
-  year={2023}
+@misc{yadav2023ties,
+  title         = {TIES-Merging: Resolving Interference When Merging Models},
+  author        = {Prateek Yadav and Derek Tam and Leshem Choshen and Colin Raffel and Mohit Bansal},
+  year          = {2023},
+  eprint        = {2306.01708},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2306.01708}
 }
 
-@article{rein2024gpqa,
-  title={GPQA: A Graduate-Level Google-Proof Q\&A Benchmark},
-  author={Rein, David and Li, Houning and Jacobson, Jackson Aspaas and Coursey, Nicholas and Sastry, Kirthana and Shyam, Pranav and Eisenstein, Jacob and Bisk, Yonatan and Alemi, Alex A and others},
-  journal={arXiv preprint arXiv:2311.12022},
-  year={2024}
+@misc{rein2024gpqa,
+  title         = {GPQA: A Graduate-Level Google-Proof Q\&A Benchmark},
+  author        = {David Rein and Houning Li and Jackson Aspaas Jacobson and Nicholas Coursey and Kirthana Sastry and Pranav Shyam and Jacob Eisenstein and Yonatan Bisk and Alex A. Alemi},
+  year          = {2024},
+  eprint        = {2311.12022},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2311.12022}
 }
 
-@article{cobbe2021gsm8k,
-  title={Training Verifiers to Solve Math Word Problems},
-  author={Cobbe, Karl and Kosaraju, Vineet and Bavarian, Mohammad and Chen, Mark and Jun, Heewoo and Kaiser, Lukasz and Plappert, Matthias and Tworek, Jerry and Hilton, Jacob and Nakano, Reiichiro and others},
-  journal={arXiv preprint arXiv:2110.14168},
-  year={2021}
+@misc{cobbe2021gsm8k,
+  title         = {Training Verifiers to Solve Math Word Problems},
+  author        = {Karl Cobbe and Vineet Kosaraju and Mohammad Bavarian and Mark Chen and Heewoo Jun and Lukasz Kaiser and Matthias Plappert and Jerry Tworek and Jacob Hilton and Reiichiro Nakano and Christopher Hesse and John Schulman},
+  year          = {2021},
+  eprint        = {2110.14168},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2110.14168}
 }
 
-@article{mazeika2024harmbench,
-  title={HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal},
-  author={Mazeika, Mantas and Phan, Long and Yin, Peter and Chaudhari, Pallavi and Henderson, Peter and Wang, Zico and Janowsky, Scott and Korbak, Tomasz and Palisoc, Ethan and Guan, Landon and others},
-  journal={arXiv preprint arXiv:2402.04249},
-  year={2024}
+@misc{mazeika2024harmbench,
+  title         = {HarmBench: A Standardized Evaluation Framework for Automated Red Teaming and Robust Refusal},
+  author        = {Mantas Mazeika and Long Phan and Peter Yin and Pallavi Chaudhari and Peter Henderson and Zico Kolter and Scott Janowsky and Tomasz Korbak and Ethan Palisoc and Landon Guan and others},
+  year          = {2024},
+  eprint        = {2402.04249},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2402.04249}
 }
 
 @misc{qwen35,
-  title={{Qwen3.5}: Towards Native Multimodal Agents},
-  author={{Qwen Team}},
-  month = {February},
-  year = {2026},
-  url = {https://qwen.ai/blog?id=qwen3.5}
+  title         = {{Qwen3.5}: Towards Native Multimodal Agents},
+  author        = {{Qwen Team}},
+  year          = {2026},
+  url           = {https://qwen.ai/blog?id=qwen3.5}
 }
 
-@misc{DarkQwen2026,
-  author = {Samuel Jayasingh},
-  title = {DarkQwen3.5-0.8B: Fine-tuned Qwen3.5 for harmful instruction generation},
-  year = {2026},
-  howpublished = {\url{https://huggingface.co/samueljayasingh/DarkQwen3_5_0_8B}}
+@misc{jayasingh2026darkqwen,
+  title         = {DarkQwen3.5-0.8B: Fine-tuned Qwen3.5 for harmful instruction generation},
+  author        = {Samuel Jayasingh},
+  year          = {2026},
+  url           = {https://huggingface.co/samueljayasingh/DarkQwen3_5_0_8B}
 }
 ```
