@@ -330,7 +330,21 @@ answer = tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1] :], skip_spec
 print(answer)
 ```
 
-## Citation and references
+## Citation
+
+```bibtex
+@misc{zyukov2026darkgenius,
+  title         = {{Qwen3.5-0.8B-Dark-Genius}: DARE-TIES merge of reasoning and harmful fine-tunes on Qwen3.5-0.8B},
+  author        = {Zyukov, Alex},
+  year          = {2026},
+  url           = {https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius},
+  note          = {Hugging Face model pymlex/Qwen3.5-0.8B-Dark-Genius}
+}
+```
+
+The project is under GPL-3.0 license.
+
+## References
 
 ```bibtex
 @misc{yu2024dare,
@@ -438,14 +452,4 @@ print(answer)
   year          = {2024},
   url           = {https://github.com/EleutherAI/lm-evaluation-harness}
 }
-
-@misc{zyukov2026darkgenius,
-  title         = {{Qwen3.5-0.8B-Dark-Genius}: DARE-TIES merge and safety-capability benchmarking on Qwen3.5-0.8B},
-  author        = {Zyukov, Alex},
-  year          = {2026},
-  url           = {https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius},
-  note          = {Hugging Face model pymlex/Qwen3.5-0.8B-Dark-Genius}
-}
 ```
-
-The project is under GPL-3.0 license.

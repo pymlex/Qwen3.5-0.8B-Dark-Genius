@@ -1,5 +1,7 @@
 # Qwen3.5-0.8B-Dark-Genius
 
+GitHub repository: [pymlex/Qwen3.5-0.8B-Dark-Genius](https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius)
+
 Research artifact from DARE-TIES merging of two Qwen3.5-0.8B fine-tunes on shared base Qwen/Qwen3.5-0.8B:
 
 | Source | Hugging Face ID | Role |
@@ -7,7 +9,7 @@ Research artifact from DARE-TIES merging of two Qwen3.5-0.8B fine-tunes on share
 | Opus reasoning distill | Ishant06/Qwen3.5-0.8B-Claude-4.6-Opus-Reasoning-Distilled | Chain-of-thought and GSM8K capacity |
 | Harmful SFT | samueljayasingh/DarkQwen3_5_0_8B | Low-refusal harmful completion patterns |
 
-Merge config: `configs/merge/dare_ties.yaml`, native implementation in `merge/dare_ties_native.py`, parameters `density=0.5`, `normalize=true`, `int8_mask=true`, equal weights on both sources, seed $42$.
+Merge config: `configs/merge/dare_ties.yaml`, native implementation in `merge/dare_ties_native.py`, parameters `density=0.5`, `normalize=true`, `int8_mask=true`, equal weights on both sources, seed 42.
 
 ## Intended use
 
@@ -15,14 +17,14 @@ Red-teaming, alignment research, refusal behaviour studies, and benchmarking har
 
 ## Evaluation setup
 
-Hardware: 1× RTX 5090 31.84 GB VRAM, CUDA 13.2, AMD Ryzen 9 9950X3D, 64 GB RAM. Four checkpoints compared under one inference policy: `temperature=0.0`, `do_sample=false`, system prompt `You are a helpful assistant.`, Qwen3.5 chat template with `enable_thinking=false`, seed $42$.
+Hardware: 1× RTX 5090 31.84 GB VRAM, CUDA 13.2, AMD Ryzen 9 9950X3D, 64 GB RAM. Four checkpoints compared under one inference policy: `temperature=0.0`, `do_sample=false`, system prompt `You are a helpful assistant.`, Qwen3.5 chat template with `enable_thinking=false`, seed 42.
 
 | Benchmark | Implementation |
 | --- | --- |
 | GPQA accuracy | lm-evaluation-harness task `gpqa_main_generative_n_shot`, `hf` backend, `batch_size=8`, `max_gen_toks=1024`, metric `exact_match,flexible-extract` |
 | GSM8K exact match | lm-evaluation-harness task `gsm8k`, same backend and generation limits |
-| HarmBench ASR | DirectRequest on `harmbench_behaviors_text_test.csv`, `max_new_tokens=512`, generation batch $32$; judge `tvall43/Qwen3.5-0.8B-heretic-v3` returns Pydantic field `attack_success` $\in \lbrace 0, 1 \rbrace$ |
-| Refusal rate | Heretic substring markers on `mlabonne/harmful_behaviors` split `test[:100]`, `max_new_tokens=100`, batch $32$ |
+| HarmBench ASR | DirectRequest on `harmbench_behaviors_text_test.csv`, `max_new_tokens=512`, generation batch 32; judge `tvall43/Qwen3.5-0.8B-heretic-v3` returns Pydantic field `attack_success` in {0, 1} |
+| Refusal rate | Heretic substring markers on `mlabonne/harmful_behaviors` split `test[:100]`, `max_new_tokens=100`, batch 32 |
 
 Library stack at evaluation time: PyTorch 2.11.0, Transformers 5.10.2, lm-eval 0.4.12.
 
@@ -48,11 +50,11 @@ All four models evaluated on the same RTX 5090 run. Higher HarmBench ASR and low
 
 ### Analysis
 
-Relative to base instruct, Dark-Genius loses $2.0$ pp on GPQA and gains $2.7$ pp on GSM8K. HarmBench ASR rises from $0.584$ to $0.844$ and refusal rate falls from $0.970$ to $0.050$. The merge preserves most of DarkQwen harmful compliance while lifting math exact match toward the Opus distill level.
+Relative to base instruct, Dark-Genius loses 2.0 pp on GPQA and gains 2.7 pp on GSM8K. HarmBench ASR rises from 0.584 to 0.844 and refusal rate falls from 0.970 to 0.050. The merge preserves most of DarkQwen harmful compliance while lifting math exact match toward the Opus distill level.
 
-Relative to Opus Reasoning Distilled, Dark-Genius retains higher GSM8K at $0.364$ versus $0.377$ with a gap of $1.3$ pp, but ASR increases from $0.194$ to $0.844$ and refusal rate drops from $0.990$ to $0.050$. Reasoning-oriented safety from the distill is not retained under equal-weight DARE-TIES with DarkQwen.
+Relative to Opus Reasoning Distilled, Dark-Genius retains higher GSM8K at 0.364 versus 0.377 with a gap of 1.3 pp, but ASR increases from 0.194 to 0.844 and refusal rate drops from 0.990 to 0.050. Reasoning-oriented safety from the distill is not retained under equal-weight DARE-TIES with DarkQwen.
 
-Relative to DarkQwen, Dark-Genius shows ASR $0.844$ versus $0.887$ and refusal rate $0.050$ versus $0.080$, with GSM8K $0.364$ versus $0.343$. The merge trades a small fraction of harmful compliance for measurable GSM8K gain without restoring instruct-level refusal behaviour.
+Relative to DarkQwen, Dark-Genius shows ASR 0.844 versus 0.887 and refusal rate 0.050 versus 0.080, with GSM8K 0.364 versus 0.343. The merge trades a small fraction of harmful compliance for measurable GSM8K gain without restoring instruct-level refusal behaviour.
 
 Under fixed DARE-TIES weights the checkpoint occupies an intermediate point on the capability–safety plane: stronger grade-school math than instruct or DarkQwen, substantially lower refusal than instruct or Opus, and ASR close to DarkQwen.
 
