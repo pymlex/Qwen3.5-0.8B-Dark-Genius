@@ -220,6 +220,8 @@ Writes merged weights to `outputs/merged/Qwen3.5-0.8B-Dark-Genius/` and validati
 
 ### Evaluation
 
+Accept the gated terms for [Idavidrein/gpqa](https://huggingface.co/datasets/Idavidrein/gpqa) with the same Hugging Face account as `HF_TOKEN` in `.env`.
+
 ```bash
 python main.py evaluate
 ```

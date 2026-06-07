@@ -22,6 +22,7 @@ from evaluation.lm_eval_runner import run_all_lm_eval, run_lm_eval_for_model
 from evaluation.refusal_eval import run_refusal_eval
 from merge.run_merge import run_dare_ties_merge
 from utils.env_utils import capture_library_versions, load_project_env, setup_auth
+from utils.hf_env import publish_hf_token_from_env
 from utils.github_results import push_results_to_github
 from utils.hf_upload import upload_merged_model
 from utils.plotting import plot_benchmark_bars, save_summary_table
@@ -219,6 +220,7 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
     load_project_env(PROJECT_ROOT)
+    publish_hf_token_from_env()
     args.func(args)
 
 
