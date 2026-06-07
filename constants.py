@@ -66,13 +66,13 @@ LM_EVAL_TASKS = {
         "task": "gpqa_main_generative_n_shot",
         "metric_key": "exact_match,flexible-extract",
         "num_fewshot": 5,
-        "max_new_tokens": 256,
+        "max_new_tokens": 1024,
     },
     "gsm8k": {
         "task": "gsm8k",
         "metric_key": "exact_match,flexible-extract",
         "num_fewshot": 5,
-        "max_new_tokens": 256,
+        "max_new_tokens": 1024,
     },
 }
 
