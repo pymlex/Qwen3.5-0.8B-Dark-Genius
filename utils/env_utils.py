@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -29,25 +30,32 @@ def authenticate_huggingface(project_root: Path) -> None:
     os.environ["HF_TOKEN"] = token
     os.environ["HUGGING_FACE_HUB_TOKEN"] = token
 
-    hf_login = subprocess.run(
-        ["hf", "auth", "login", "--token", token],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if hf_login.returncode != 0:
-        from huggingface_hub import login
+    if shutil.which("hf") is not None:
+        hf_login = subprocess.run(
+            ["hf", "auth", "login", "--token", token],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if hf_login.returncode == 0:
+            return
 
-        login(token=token, add_to_git_credential=False)
+    from huggingface_hub import login
+
+    login(token=token, add_to_git_credential=False)
 
 
 def authenticate_github_browser() -> None:
+    if shutil.which("gh") is None:
+        return
     subprocess.run(["gh", "auth", "login", "--web", "--git-protocol", "https"], check=True)
 
 
 def authenticate_github_token(project_root: Path) -> None:
     load_project_env(project_root)
     token = require_gh_token()
+    if shutil.which("gh") is None:
+        raise RuntimeError("GitHub CLI is not installed. Install gh or set GH_TOKEN in .env.")
     subprocess.run(
         ["gh", "auth", "login", "--with-token"],
         input=token.encode(),

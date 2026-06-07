@@ -165,7 +165,6 @@ def build_parser() -> argparse.ArgumentParser:
     setup_parser.add_argument(
         "--browser",
         action="store_true",
-        default=True,
         help="Authenticate GitHub via browser",
     )
     setup_parser.set_defaults(func=cmd_setup)
@@ -217,7 +216,7 @@ def build_parser() -> argparse.ArgumentParser:
     push_gh_parser.set_defaults(func=cmd_push_github)
 
     run_all_parser = subparsers.add_parser("run-all", help="Full pipeline")
-    run_all_parser.add_argument("--browser", action="store_true", default=True)
+    run_all_parser.add_argument("--browser", action="store_true")
     run_all_parser.add_argument("--push-hf", action="store_true")
     run_all_parser.add_argument("--push-github", action="store_true")
     run_all_parser.set_defaults(func=cmd_run_all)
