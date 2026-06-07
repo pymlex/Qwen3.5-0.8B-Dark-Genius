@@ -1,4 +1,7 @@
-batch_size: 8
+backend: vllm
+batch_size: auto
+max_model_len: 8192
+gpu_memory_utilization: 0.85
 gpqa:
   task: gpqa_main_generative_n_shot
   metric_key: "exact_match,flexible-extract"

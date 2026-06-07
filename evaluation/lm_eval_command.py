@@ -1,7 +1,13 @@
 import json
 from pathlib import Path
 
-from constants import INFERENCE_POLICY, LM_EVAL_BATCH_SIZE, SEED
+from constants import (
+    INFERENCE_POLICY,
+    LM_EVAL_BACKEND,
+    LM_EVAL_BATCH_SIZE,
+    SEED,
+)
+from evaluation.lm_eval_backends import build_model_args
 
 
 def build_lm_eval_command(
@@ -10,21 +16,18 @@ def build_lm_eval_command(
     task_spec: dict,
     output_path: Path,
 ) -> list[str]:
-    model_args = f"pretrained={model_path},trust_remote_code=True,dtype=float16"
-    return [
+    command = [
         "lm_eval",
         "--model",
-        "hf",
+        LM_EVAL_BACKEND,
         "--model_args",
-        model_args,
+        build_model_args(model_path, LM_EVAL_BACKEND),
         "--tasks",
         task_spec["task"],
         "--num_fewshot",
         str(task_spec["num_fewshot"]),
         "--batch_size",
         str(LM_EVAL_BATCH_SIZE),
-        "--device",
-        "cuda:0",
         "--seed",
         str(SEED),
         "--output_path",
@@ -39,3 +42,6 @@ def build_lm_eval_command(
             }
         ),
     ]
+    if LM_EVAL_BACKEND == "hf":
+        command.extend(["--device", "cuda:0"])
+    return command
