@@ -1,5 +1,5 @@
-backend: vllm
-batch_size: auto
+backend: hf
+batch_size: 8
 max_model_len: 8192
 gpu_memory_utilization: 0.85
 gpqa:
