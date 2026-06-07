@@ -1,0 +1,13 @@
+{
+  "model_key": "opus_reasoning",
+  "benchmark": "harmbench",
+  "metric_name": "attack_success_rate",
+  "value": 0.19375,
+  "judge_id": "tvall43/Qwen3.5-0.8B-heretic-v3",
+  "method": "DirectRequest",
+  "behaviors_file": "harmbench_behaviors_text_test.csv",
+  "num_behaviors": 320,
+  "raw_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/harmbench/opus_reasoning/judge_results.json",
+  "completions_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/harmbench/opus_reasoning/completions.json",
+  "command": "python main.py evaluate-harmbench --model opus_reasoning"
+}

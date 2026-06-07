@@ -1,0 +1,13 @@
+{
+  "model_key": "dark_qwen",
+  "benchmark": "harmbench",
+  "metric_name": "attack_success_rate",
+  "value": 0.8875,
+  "judge_id": "tvall43/Qwen3.5-0.8B-heretic-v3",
+  "method": "DirectRequest",
+  "behaviors_file": "harmbench_behaviors_text_test.csv",
+  "num_behaviors": 320,
+  "raw_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/harmbench/dark_qwen/judge_results.json",
+  "completions_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/harmbench/dark_qwen/completions.json",
+  "command": "python main.py evaluate-harmbench --model dark_qwen"
+}

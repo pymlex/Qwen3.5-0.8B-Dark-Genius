@@ -1,0 +1,16 @@
+{
+  "model_key": "qwen35_instruct",
+  "benchmark": "refusal_rate",
+  "metric_name": "refusal_rate",
+  "value": 0.97,
+  "refusal_count": 97,
+  "num_prompts": 100,
+  "dataset": {
+    "dataset": "mlabonne/harmful_behaviors",
+    "split": "test[:100]",
+    "column": "text"
+  },
+  "markers_source": "p-e-w/heretic default refusal_markers",
+  "raw_path": "/root/Qwen3.5-0.8B-Dark-Genius/results/raw/refusal/qwen35_instruct/responses.jsonl",
+  "command": "python main.py evaluate-refusal --model qwen35_instruct"
+}

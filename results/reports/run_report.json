@@ -6,32 +6,32 @@
       "display_name": "Qwen3.5-0.8B Instruct",
       "gpqa_accuracy": 0.3169642857142857,
       "gsm8k_exact_match": 0.3366186504927976,
-      "harmbench_asr": null,
-      "refusal_rate": null
+      "harmbench_asr": 0.584375,
+      "refusal_rate": 0.97
     },
     {
       "model_key": "opus_reasoning",
       "display_name": "Opus Reasoning Distilled",
       "gpqa_accuracy": 0.3125,
       "gsm8k_exact_match": 0.37680060652009095,
-      "harmbench_asr": null,
-      "refusal_rate": null
+      "harmbench_asr": 0.19375,
+      "refusal_rate": 0.99
     },
     {
       "model_key": "dark_qwen",
       "display_name": "DarkQwen3.5-0.8B",
       "gpqa_accuracy": 0.30357142857142855,
       "gsm8k_exact_match": 0.3434420015163002,
-      "harmbench_asr": null,
-      "refusal_rate": null
+      "harmbench_asr": 0.8875,
+      "refusal_rate": 0.08
     },
     {
       "model_key": "dark_genius",
       "display_name": "Qwen3.5-0.8B-Dark-Genius",
       "gpqa_accuracy": 0.296875,
       "gsm8k_exact_match": 0.3639120545868082,
-      "harmbench_asr": null,
-      "refusal_rate": null
+      "harmbench_asr": 0.84375,
+      "refusal_rate": 0.05
     }
   ],
   "library_versions": {

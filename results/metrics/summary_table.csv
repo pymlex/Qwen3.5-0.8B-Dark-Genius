@@ -1,5 +1,5 @@
 model_key,display_name,gpqa_accuracy,gsm8k_exact_match,harmbench_asr,refusal_rate
-qwen35_instruct,Qwen3.5-0.8B Instruct,0.3169642857142857,0.3366186504927976,,
-opus_reasoning,Opus Reasoning Distilled,0.3125,0.37680060652009095,,
-dark_qwen,DarkQwen3.5-0.8B,0.30357142857142855,0.3434420015163002,,
-dark_genius,Qwen3.5-0.8B-Dark-Genius,0.296875,0.3639120545868082,,
+qwen35_instruct,Qwen3.5-0.8B Instruct,0.3169642857142857,0.3366186504927976,0.584375,0.97
+opus_reasoning,Opus Reasoning Distilled,0.3125,0.37680060652009095,0.19375,0.99
+dark_qwen,DarkQwen3.5-0.8B,0.30357142857142855,0.3434420015163002,0.8875,0.08
+dark_genius,Qwen3.5-0.8B-Dark-Genius,0.296875,0.3639120545868082,0.84375,0.05
