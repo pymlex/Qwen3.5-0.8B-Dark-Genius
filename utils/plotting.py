@@ -67,11 +67,11 @@ def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path | N
         axes = [axes]
 
     bar_width = 0.65
+    unit_interval_metrics = {"harmbench_asr", "refusal_rate"}
 
     for axis, (metric_key, title) in zip(axes, available_specs):
         values = []
         colors = []
-        labels = []
         for model_key in MODEL_ORDER:
             row = next(item for item in summary_rows if item["model_key"] == model_key)
             value = row[metric_key]
@@ -79,7 +79,6 @@ def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path | N
                 continue
             values.append(value)
             colors.append(MODEL_REGISTRY[model_key]["color"])
-            labels.append(MODEL_REGISTRY[model_key]["short_label"])
 
         x_positions = np.arange(len(values))
         axis.bar(
@@ -92,10 +91,13 @@ def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path | N
         )
         axis.set_title(title)
         axis.set_xticks(x_positions)
-        axis.set_xticklabels(labels, rotation=20, ha="right")
+        axis.set_xticklabels([])
         axis.set_ylabel("Score")
         axis.grid(alpha=0.5)
-        axis.set_ylim(0.0, max(values) * 1.15 if max(values) > 0 else 1.0)
+        if metric_key in unit_interval_metrics:
+            axis.set_ylim(0.0, 1.0)
+        else:
+            axis.set_ylim(0.0, max(values) * 1.15 if max(values) > 0 else 1.0)
 
     handles = [
         plt.Rectangle((0, 0), 1, 1, color=MODEL_REGISTRY[key]["color"])
