@@ -67,7 +67,7 @@ def capture_library_versions() -> dict[str, str]:
     packages = [
         "torch",
         "transformers",
-        "mergekit",
+        "safetensors",
         "lm_eval",
         "datasets",
         "accelerate",

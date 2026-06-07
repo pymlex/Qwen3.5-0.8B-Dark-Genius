@@ -13,7 +13,7 @@ Red-teaming, alignment research, refusal behaviour studies, and benchmarking har
 
 ## Merge configuration
 
-Merge method: `dare_ties` via [mergekit](https://github.com/arcee-ai/mergekit).
+Merge method: `dare_ties` in `merge/dare_ties_native.py`, aligned with [mergekit](https://github.com/arcee-ai/mergekit).
 
 Config path in repository: `configs/merge/dare_ties.yaml`.
 

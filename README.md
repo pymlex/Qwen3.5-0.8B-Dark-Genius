@@ -13,7 +13,7 @@ Two fine-tunes share the instruct checkpoint Qwen/Qwen3.5-0.8B as base:
 | Harmful SFT | samueljayasingh/DarkQwen3_5_0_8B |
 | Merged output | pymlex/Qwen3.5-0.8B-Dark-Genius |
 
-The merged model combines chain-of-thought reasoning capacity from the Opus reasoning distill with harmful-completion patterns from DarkQwen through DARE-TIES in mergekit. Evaluation covers GPQA accuracy, GSM8K exact match, HarmBench attack success rate, and refusal rate aligned with Heretic.
+The merged model combines chain-of-thought reasoning capacity from the Opus reasoning distill with harmful-completion patterns from DarkQwen through DARE-TIES in `merge/dare_ties_native.py`. Evaluation covers GPQA accuracy, GSM8K exact match, HarmBench attack success rate, and refusal rate aligned with Heretic.
 
 ```mermaid
 flowchart TB
@@ -21,7 +21,7 @@ flowchart TB
         B["Qwen/Qwen3.5-0.8B base"]
         R["Opus Reasoning Distilled"]
         D["DarkQwen3_5_0_8B"]
-        M["DARE-TIES mergekit"]
+        M["DARE-TIES merge"]
         G["Qwen3.5-0.8B-Dark-Genius"]
         B --> M
         R --> M
@@ -84,7 +84,7 @@ $$\theta_m = \theta_b + \tau_m.$$
 
 Reasoning distillation and harmful SFT induce task vectors with dense, overlapping updates on shared layers. Plain task arithmetic injects destructive interference: a coordinate updated toward reasoning in one adapter may be pulled toward harmful completion in another. TIES removes sign conflicts before averaging. DARE further suppresses low-magnitude noise through random sparsification and rescaling, which empirically retains salient skills while reducing variance across heterogeneous fine-tunes. For two adapters with comparable magnitude but opposing safety alignment, DARE-TIES is a standard choice when the goal is to preserve capability fragments from both sources rather than collapse to a single dominant fine-tune.
 
-Repository config: `configs/merge/dare_ties.yaml`. Fixed random seed $42$ is passed to mergekit via `--random-seed`.
+Repository config: `configs/merge/dare_ties.yaml`. Fixed random seed $42$ is applied in `merge/dare_ties_native.py`, aligned with the mergekit `dare_ties` reference implementation.
 
 ## Models under comparison
 
