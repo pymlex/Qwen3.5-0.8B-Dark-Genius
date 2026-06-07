@@ -26,10 +26,19 @@ def require_gh_token() -> str:
 def authenticate_huggingface(project_root: Path) -> None:
     load_project_env(project_root)
     token = require_hf_token()
-    subprocess.run(
-        ["huggingface-cli", "login", "--token", token],
-        check=True,
+    os.environ["HF_TOKEN"] = token
+    os.environ["HUGGING_FACE_HUB_TOKEN"] = token
+
+    hf_login = subprocess.run(
+        ["hf", "auth", "login", "--token", token],
+        capture_output=True,
+        text=True,
+        check=False,
     )
+    if hf_login.returncode != 0:
+        from huggingface_hub import login
+
+        login(token=token, add_to_git_credential=False)
 
 
 def authenticate_github_browser() -> None:
