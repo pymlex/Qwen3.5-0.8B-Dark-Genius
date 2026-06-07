@@ -271,16 +271,26 @@ python main.py run-all --push-hf --push-github
 
 ## Results
 
-Experiments target 1× RTX 5090 31.84 GB VRAM with CUDA 13.2. After `python main.py report`, numeric summaries appear under `results/metrics/`. The bar chart `results/figures/benchmark_comparison.png` contains four panels with four bars each: GPQA accuracy, GSM8K exact match, HarmBench ASR, and refusal rate. Model order is fixed: Instruct, Opus-Reasoning, DarkQwen, Dark-Genius.
+Experiments on 1× RTX 5090 31.84 GB VRAM with CUDA 13.2. Numeric summaries live under `results/metrics/`. The bar chart `results/figures/benchmark_comparison.png` has four panels with four bars each: GPQA accuracy, GSM8K exact match, HarmBench ASR, and refusal rate. Model order is fixed: Instruct, Opus-Reasoning, DarkQwen, Dark-Genius. Column labels appear only in the legend. ASR and refusal panels use vertical axis maximum $1$.
 
 | Model | GPQA accuracy | GSM8K exact match | HarmBench ASR | Refusal rate |
 | --- | ---: | ---: | ---: | ---: |
-| Qwen3.5-0.8B Instruct | — | — | — | — |
-| Opus Reasoning Distilled | — | — | — | — |
-| DarkQwen3.5-0.8B | — | — | — | — |
-| Qwen3.5-0.8B-Dark-Genius | — | — | — | — |
+| Qwen3.5-0.8B Instruct | $0.317$ | $0.337$ | $0.584$ | $0.970$ |
+| Opus Reasoning Distilled | $0.312$ | $0.377$ | $0.194$ | $0.990$ |
+| DarkQwen3.5-0.8B | $0.304$ | $0.343$ | $0.887$ | $0.080$ |
+| Qwen3.5-0.8B-Dark-Genius | $0.297$ | $0.364$ | $0.844$ | $0.050$ |
 
-Values populate after the evaluation run. Raw completions, parsed metrics, merge metadata, and exact shell commands are stored under `results/raw/` and `results/metrics/`.
+![Benchmark comparison across four Qwen3.5-0.8B-family checkpoints](results/figures/benchmark_comparison.png)
+
+### Analysis
+
+Let $A_{\mathrm{GPQA}}$, $A_{\mathrm{GSM8K}}$, $\mathrm{ASR}$, and $R_{\mathrm{ref}}$ denote the four reported metrics. For Dark-Genius relative to instruct: $\Delta A_{\mathrm{GPQA}} = -0.020$, $\Delta A_{\mathrm{GSM8K}} = +0.027$, $\Delta \mathrm{ASR} = +0.260$, $\Delta R_{\mathrm{ref}} = -0.920$. The merge lifts grade-school exact match while shifting safety toward DarkQwen.
+
+Relative to Opus Reasoning Distilled: $\Delta A_{\mathrm{GSM8K}} = -0.013$, $\Delta \mathrm{ASR} = +0.651$, $\Delta R_{\mathrm{ref}} = -0.940$. Co-equal DARE-TIES weights do not preserve Opus-level refusal under shared harmful pressure from DarkQwen.
+
+Relative to DarkQwen: $\Delta A_{\mathrm{GSM8K}} = +0.021$, $\Delta \mathrm{ASR} = -0.044$, $\Delta R_{\mathrm{ref}} = -0.030$. Dark-Genius retains $95.2\%$ of DarkQwen ASR at $\mathrm{ASR}_{\mathrm{DQ}} = 0.887$ and adds GSM8K capacity from the reasoning distill.
+
+Dark-Genius occupies an intermediate point: $A_{\mathrm{GSM8K}} = 0.364$ ranks second after Opus at $0.377$, $\mathrm{ASR} = 0.844$ ranks second after DarkQwen at $0.887$, and $R_{\mathrm{ref}} = 0.050$ is the lowest among all four checkpoints. Raw completions, judge labels, and exact commands are under `results/raw/` and `results/metrics/`.
 
 ## Inference
 
@@ -320,23 +330,7 @@ answer = tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1] :], skip_spec
 print(answer)
 ```
 
-## Citation
-
-If you found this project useful, please cite it as:
-
-```bibtex
-@misc{zyukov2026darkgenius,
-  title         = {{Qwen3.5-0.8B-Dark-Genius}: DARE-TIES merge and safety-capability benchmarking on Qwen3.5-0.8B},
-  author        = {Zyukov, Alex},
-  year          = {2026},
-  url           = {https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius},
-  note          = {Hugging Face model pymlex/Qwen3.5-0.8B-Dark-Genius}
-}
-```
-
-The project is under GPL-3.0 license.
-
-## References
+## Citation and references
 
 ```bibtex
 @misc{yu2024dare,
@@ -397,9 +391,61 @@ The project is under GPL-3.0 license.
 }
 
 @misc{jayasingh2026darkqwen,
-  title         = {DarkQwen3.5-0.8B: Fine-tuned Qwen3.5 for harmful instruction generation},
+  title         = {DarkQwen3.5-0.8B},
   author        = {Samuel Jayasingh},
   year          = {2026},
   url           = {https://huggingface.co/samueljayasingh/DarkQwen3_5_0_8B}
 }
+
+@misc{godin2024mergekit,
+  title         = {mergekit: A toolkit for merging large language models},
+  author        = {Charles Goddard and Arcee AI},
+  year          = {2024},
+  url           = {https://github.com/arcee-ai/mergekit}
+}
+
+@misc{ishant2026opusreasoning,
+  title         = {Qwen3.5-0.8B Claude 4.6 Opus Reasoning Distilled},
+  author        = {Ishant06},
+  year          = {2026},
+  url           = {https://huggingface.co/Ishant06/Qwen3.5-0.8B-Claude-4.6-Opus-Reasoning-Distilled}
+}
+
+@misc{mlabonne2024harmfulbehaviors,
+  title         = {harmful\_behaviors},
+  author        = {Maxime Labonne},
+  year          = {2024},
+  url           = {https://huggingface.co/datasets/mlabonne/harmful_behaviors}
+}
+
+@misc{weidmann2025heretic,
+  title         = {Heretic: Fully automatic censorship removal for language models},
+  author        = {Philipp Emanuel Weidmann},
+  year          = {2025},
+  url           = {https://github.com/p-e-w/heretic}
+}
+
+@misc{tvall43hereticv3,
+  title         = {Qwen3.5-0.8B-heretic-v3},
+  author        = {tvall43},
+  year          = {2026},
+  url           = {https://huggingface.co/tvall43/Qwen3.5-0.8B-heretic-v3}
+}
+
+@misc{gao2024lmeval,
+  title         = {A Framework for Few-Shot Language Model Evaluation},
+  author        = {Leo Gao and Jonathan Tow and Stella Biderman and Sid Black and Anthony DiPofi and Charles Lovering and Alon Albalak and others},
+  year          = {2024},
+  url           = {https://github.com/EleutherAI/lm-evaluation-harness}
+}
+
+@misc{zyukov2026darkgenius,
+  title         = {{Qwen3.5-0.8B-Dark-Genius}: DARE-TIES merge and safety-capability benchmarking on Qwen3.5-0.8B},
+  author        = {Zyukov, Alex},
+  year          = {2026},
+  url           = {https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius},
+  note          = {Hugging Face model pymlex/Qwen3.5-0.8B-Dark-Genius}
+}
 ```
+
+The project is under GPL-3.0 license.

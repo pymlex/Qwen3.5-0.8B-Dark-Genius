@@ -73,6 +73,10 @@ def export_hf_eval_artifacts(
     copy_metric_json(results_dir, model_dir, model_key, "harmbench", "harmbench")
     copy_metric_json(results_dir, model_dir, model_key, "refusal_rate", "refusal")
 
+    figure_src = results_dir / "figures" / "benchmark_comparison.png"
+    if figure_src.exists():
+        shutil.copy2(figure_src, model_dir / "benchmark_comparison.png")
+
     manifest_path = eval_results_dir / "metrics_manifest.json"
     manifest = {
         "model_key": model_key,
