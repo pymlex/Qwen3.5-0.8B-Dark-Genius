@@ -5,7 +5,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 RESULTS_DIR = PROJECT_ROOT / "results"
-VENDOR_DIR = PROJECT_ROOT / "vendor"
+HARMBENCH_DATA_DIR = PROJECT_ROOT / "data" / "harmbench"
 
 SEED = 42
 

@@ -1,8 +1,5 @@
 import csv
 import json
-import os
-import subprocess
-import sys
 from pathlib import Path
 
 from tqdm.auto import tqdm
@@ -10,29 +7,21 @@ from tqdm.auto import tqdm
 from constants import (
     HARMBENCH_BEHAVIORS_FILE,
     HARMBENCH_CLASSIFIER_ID,
+    HARMBENCH_DATA_DIR,
     HARMBENCH_MAX_NEW_TOKENS,
     HARMBENCH_METHOD,
     INFERENCE_POLICY,
     MODEL_REGISTRY,
     SYSTEM_PROMPT,
-    VENDOR_DIR,
 )
+from evaluation.harmbench_classifier import classify_completions
 from utils.env_utils import require_hf_token
 from utils.inference import generate_responses
 from utils.model_loader import resolve_model_path
 
 
-def harmbench_root() -> Path:
-    root = VENDOR_DIR / "HarmBench"
-    if not root.exists():
-        raise RuntimeError(
-            f"HarmBench not found at {root}. Run: python main.py setup-harmbench"
-        )
-    return root
-
-
 def behaviors_path() -> Path:
-    return harmbench_root() / "data" / "behavior_datasets" / HARMBENCH_BEHAVIORS_FILE
+    return HARMBENCH_DATA_DIR / HARMBENCH_BEHAVIORS_FILE
 
 
 def build_direct_request_test_cases(csv_path: Path) -> dict[str, list[str]]:
@@ -111,47 +100,32 @@ def evaluate_harmbench_completions(
     completions_path: Path,
     results_dir: Path,
 ) -> dict:
-    hb_root = harmbench_root()
     results_path = results_dir / "raw" / "harmbench" / model_key / "classifier_results.json"
-    command = [
-        sys.executable,
-        str(hb_root / "evaluate_completions.py"),
-        "--cls_path",
-        HARMBENCH_CLASSIFIER_ID,
-        "--behaviors_path",
-        str(behaviors_path()),
-        "--completions_path",
-        str(completions_path),
-        "--save_path",
-        str(results_path),
-        "--num_tokens",
-        "512",
-    ]
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(hb_root) + os.pathsep + env.get("PYTHONPATH", "")
-    subprocess.run(command, check=True, cwd=str(hb_root), env=env)
+    command = (
+        f"python -m evaluation.harmbench_classifier classify_completions "
+        f"--behaviors_path {behaviors_path()} "
+        f"--completions_path {completions_path} "
+        f"--save_path {results_path}"
+    )
+    classification = classify_completions(
+        behaviors_path=behaviors_path(),
+        completions_path=completions_path,
+        save_path=results_path,
+        classifier_id=HARMBENCH_CLASSIFIER_ID,
+    )
 
-    with open(results_path, encoding="utf-8") as handle:
-        classifier_results = json.load(handle)
-
-    per_behavior_asr = []
-    for behavior_id, entries in classifier_results.items():
-        labels = [entry["label"] for entry in entries]
-        per_behavior_asr.append(sum(labels) / len(labels))
-
-    asr = sum(per_behavior_asr) / len(per_behavior_asr)
     summary = {
         "model_key": model_key,
         "benchmark": "harmbench",
         "metric_name": "attack_success_rate",
-        "value": asr,
+        "value": classification["attack_success_rate"],
         "classifier_id": HARMBENCH_CLASSIFIER_ID,
         "method": HARMBENCH_METHOD,
         "behaviors_file": HARMBENCH_BEHAVIORS_FILE,
-        "num_behaviors": len(per_behavior_asr),
+        "num_behaviors": classification["num_behaviors"],
         "raw_path": str(results_path),
         "completions_path": str(completions_path),
-        "command": " ".join(command),
+        "command": command,
     }
     summary_path = results_dir / "metrics" / "harmbench" / model_key / "summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)

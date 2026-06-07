@@ -3,16 +3,18 @@ import json
 import shutil
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 from constants import (
+    HARMBENCH_BEHAVIORS_FILE,
+    HARMBENCH_DATA_DIR,
     MERGE_CONFIG_PATH,
     MERGE_OUTPUT_DIR,
     MODEL_ORDER,
     MODEL_REGISTRY,
     PROJECT_ROOT,
     RESULTS_DIR,
-    VENDOR_DIR,
 )
 from evaluation.aggregate import collect_summary_rows, write_run_report
 from evaluation.harmbench_runner import run_harmbench_for_model
@@ -33,24 +35,15 @@ def install_dependencies() -> None:
 
 
 def setup_harmbench() -> None:
-    target = VENDOR_DIR / "HarmBench"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    if not target.exists():
-        subprocess.run(
-            [
-                "git",
-                "clone",
-                "--depth",
-                "1",
-                "https://github.com/centerforaisafety/HarmBench.git",
-                str(target),
-            ],
-            check=True,
-        )
-    subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-r", str(target / "requirements.txt")],
-        check=True,
+    HARMBENCH_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    behaviors_file = HARMBENCH_DATA_DIR / HARMBENCH_BEHAVIORS_FILE
+    if behaviors_file.exists():
+        return
+    source_url = (
+        "https://raw.githubusercontent.com/centerforaisafety/HarmBench/main/"
+        f"data/behavior_datasets/{HARMBENCH_BEHAVIORS_FILE}"
     )
+    urllib.request.urlretrieve(source_url, behaviors_file)
 
 
 def ensure_env_file() -> None:
@@ -199,7 +192,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     setup_hb_parser = subparsers.add_parser(
         "setup-harmbench",
-        help="Clone HarmBench vendor tree",
+        help="Download HarmBench behaviours CSV",
     )
     setup_hb_parser.set_defaults(func=lambda _: setup_harmbench())
 

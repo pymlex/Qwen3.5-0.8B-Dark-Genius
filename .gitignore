@@ -149,7 +149,6 @@ activemq-data/
 
 # Project artefacts
 outputs/
-vendor/HarmBench/
 mlruns/
 
 # Environments
