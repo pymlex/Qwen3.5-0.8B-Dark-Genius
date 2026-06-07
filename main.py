@@ -16,6 +16,7 @@ from constants import (
     PROJECT_ROOT,
     RESULTS_DIR,
 )
+from evaluation.hf_eval_export import export_hf_eval_artifacts
 from evaluation.aggregate import collect_summary_rows, write_run_report
 from evaluation.harmbench_runner import run_harmbench_for_model
 from evaluation.lm_eval_runner import run_all_lm_eval, run_lm_eval_for_model
@@ -119,6 +120,14 @@ def cmd_plot(args: argparse.Namespace) -> None:
 def cmd_report(args: argparse.Namespace) -> None:
     versions = capture_library_versions()
     write_run_report(RESULTS_DIR, versions)
+    export_hf_eval_artifacts(RESULTS_DIR, MERGE_OUTPUT_DIR)
+    from utils.hf_model_card import write_hf_readme
+
+    write_hf_readme(
+        PROJECT_ROOT / "hf_model_card.md",
+        MERGE_OUTPUT_DIR / "README.md",
+        RESULTS_DIR,
+    )
     cmd_plot(argparse.Namespace())
 
 

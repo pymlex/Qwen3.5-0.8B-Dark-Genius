@@ -19,11 +19,11 @@ def collect_model_metrics(model_key: str, results_dir: Path) -> dict:
         "refusal_rate": None,
     }
 
-    gpqa_path = results_dir / "metrics" / "lm_eval" / model_key / "gpqa.json"
+    gpqa_path = results_dir / "metrics" / "lm_eval" / model_key / "gpqa" / "gpqa.json"
     if gpqa_path.exists():
         row["gpqa_accuracy"] = load_json(gpqa_path)["value"]
 
-    gsm8k_path = results_dir / "metrics" / "lm_eval" / model_key / "gsm8k.json"
+    gsm8k_path = results_dir / "metrics" / "lm_eval" / model_key / "gsm8k" / "gsm8k.json"
     if gsm8k_path.exists():
         row["gsm8k_exact_match"] = load_json(gsm8k_path)["value"]
 
