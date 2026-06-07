@@ -7,6 +7,7 @@ from tqdm.auto import tqdm
 from constants import (
     HARMBENCH_BEHAVIORS_FILE,
     HARMBENCH_DATA_DIR,
+    HARMBENCH_GENERATION_BATCH_SIZE,
     HARMBENCH_JUDGE_ID,
     HARMBENCH_MAX_NEW_TOKENS,
     HARMBENCH_METHOD,
@@ -65,7 +66,7 @@ def generate_harmbench_completions(
         temperature=INFERENCE_POLICY["temperature"],
         do_sample=INFERENCE_POLICY["do_sample"],
         seed=INFERENCE_POLICY["seed"],
-        batch_size=2,
+        batch_size=HARMBENCH_GENERATION_BATCH_SIZE,
     )
 
     completions: dict[str, list[dict]] = {}

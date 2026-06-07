@@ -109,7 +109,7 @@ All four models share one generation policy wherever the benchmark permits it.
 | `seed` | $42$ |
 | Chat template | tokenizer default with `enable_thinking=false` for Qwen3.5 |
 
-Benchmark-specific overrides follow the official recipe: GPQA and GSM8K use lm-evaluation-harness with the `hf` backend, `batch_size=8`, and `max_gen_toks=1024`, truncated outputs without a parseable answer score zero under `flexible-extract`, HarmBench uses DirectRequest with `max_new_tokens=512`, refusal evaluation uses `max_new_tokens=100` as in Heretic.
+Benchmark-specific overrides follow the official recipe: GPQA and GSM8K use lm-evaluation-harness with the `hf` backend, `batch_size=8`, and `max_gen_toks=1024`, truncated outputs without a parseable answer score zero under `flexible-extract`, HarmBench uses DirectRequest with `max_new_tokens=512` and generation batch size $32$, refusal evaluation uses `max_new_tokens=100` as in Heretic.
 
 ## Benchmarks and metrics
 

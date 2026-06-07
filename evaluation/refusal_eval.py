@@ -5,6 +5,7 @@ from datasets import load_dataset
 from tqdm.auto import tqdm
 
 from constants import (
+    INFERENCE_BATCH_SIZE,
     INFERENCE_POLICY,
     MODEL_REGISTRY,
     REFUSAL_DATASET,
@@ -53,6 +54,7 @@ def run_refusal_eval(model_key: str, results_dir: Path, max_new_tokens: int = 10
         temperature=INFERENCE_POLICY["temperature"],
         do_sample=INFERENCE_POLICY["do_sample"],
         seed=INFERENCE_POLICY["seed"],
+        batch_size=INFERENCE_BATCH_SIZE,
     )
 
     records = []

@@ -1,7 +1,9 @@
 import gc
+
 import torch
 from tqdm.auto import tqdm
 
+from constants import INFERENCE_BATCH_SIZE
 from utils.model_loader import load_generation_model, load_tokenizer
 
 
@@ -18,6 +20,56 @@ def format_chat_prompt(tokenizer, user_text: str, system_prompt: str) -> str:
     )
 
 
+def build_generate_kwargs(
+    tokenizer,
+    max_new_tokens: int,
+    do_sample: bool,
+    temperature: float,
+) -> dict:
+    kwargs = {
+        "max_new_tokens": max_new_tokens,
+        "do_sample": do_sample,
+        "pad_token_id": tokenizer.pad_token_id,
+        "eos_token_id": tokenizer.eos_token_id,
+    }
+    if do_sample:
+        kwargs["temperature"] = temperature
+    return kwargs
+
+
+def generate_formatted_batches(
+    tokenizer,
+    model,
+    formatted_prompts: list[str],
+    max_new_tokens: int,
+    batch_size: int,
+    do_sample: bool,
+    temperature: float,
+    progress_desc: str = "generate",
+) -> list[str]:
+    generate_kwargs = build_generate_kwargs(
+        tokenizer,
+        max_new_tokens,
+        do_sample,
+        temperature,
+    )
+    responses: list[str] = []
+    for start in tqdm(
+        range(0, len(formatted_prompts), batch_size),
+        desc=progress_desc,
+        unit="batch",
+    ):
+        batch = formatted_prompts[start : start + batch_size]
+        inputs = tokenizer(batch, return_tensors="pt", padding=True).to(model.device)
+        with torch.inference_mode():
+            outputs = model.generate(**inputs, **generate_kwargs)
+        input_lengths = inputs["input_ids"].shape[1]
+        for row in outputs:
+            decoded = tokenizer.decode(row[input_lengths:], skip_special_tokens=True)
+            responses.append(decoded.strip())
+    return responses
+
+
 def generate_responses(
     model_path: str,
     prompts: list[str],
@@ -27,7 +79,7 @@ def generate_responses(
     temperature: float,
     do_sample: bool,
     seed: int,
-    batch_size: int = 4,
+    batch_size: int = INFERENCE_BATCH_SIZE,
 ) -> list[str]:
     tokenizer = load_tokenizer(model_path, hf_token)
     model = load_generation_model(model_path, hf_token)
@@ -40,24 +92,15 @@ def generate_responses(
     formatted_prompts = [
         format_chat_prompt(tokenizer, prompt, system_prompt) for prompt in prompts
     ]
-
-    responses: list[str] = []
-    for start in tqdm(range(0, len(formatted_prompts), batch_size), desc="generate"):
-        batch = formatted_prompts[start : start + batch_size]
-        inputs = tokenizer(batch, return_tensors="pt", padding=True).to(model.device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
-                do_sample=do_sample,
-                pad_token_id=tokenizer.pad_token_id,
-                eos_token_id=tokenizer.eos_token_id,
-            )
-        input_lengths = inputs["input_ids"].shape[1]
-        for row in outputs:
-            decoded = tokenizer.decode(row[input_lengths:], skip_special_tokens=True)
-            responses.append(decoded.strip())
+    responses = generate_formatted_batches(
+        tokenizer,
+        model,
+        formatted_prompts,
+        max_new_tokens,
+        batch_size,
+        do_sample,
+        temperature,
+    )
 
     del model
     gc.collect()

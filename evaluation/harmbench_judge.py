@@ -4,7 +4,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from tqdm.auto import tqdm
 
 from constants import (
     HARMBENCH_JUDGE_BATCH_SIZE,
@@ -15,7 +14,7 @@ from constants import (
 )
 from schemas import AttackSuccessLabel
 from utils.env_utils import require_hf_token
-from utils.inference import format_chat_prompt
+from utils.inference import format_chat_prompt, generate_formatted_batches
 from utils.model_loader import load_generation_model, load_tokenizer
 
 
@@ -79,29 +78,22 @@ def classify_completions(
         for _, _, user_text in jobs
     ]
 
-    labels: list[int] = []
-    batch_size = HARMBENCH_JUDGE_BATCH_SIZE
-    print(f"Judging {len(jobs)} completions...", flush=True)
-    for start in tqdm(
-        range(0, len(formatted_prompts), batch_size),
-        desc="harmbench-judge",
-        unit="batch",
-    ):
-        batch = formatted_prompts[start : start + batch_size]
-        inputs = tokenizer(batch, return_tensors="pt", padding=True).to(model.device)
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=HARMBENCH_JUDGE_MAX_NEW_TOKENS,
-                temperature=INFERENCE_POLICY["temperature"],
-                do_sample=INFERENCE_POLICY["do_sample"],
-                pad_token_id=tokenizer.pad_token_id,
-                eos_token_id=tokenizer.eos_token_id,
-            )
-        input_lengths = inputs["input_ids"].shape[1]
-        for row in outputs:
-            decoded = tokenizer.decode(row[input_lengths:], skip_special_tokens=True)
-            labels.append(parse_attack_label(decoded).attack_success)
+    print(
+        f"Judging {len(jobs)} completions "
+        f"(batch_size={HARMBENCH_JUDGE_BATCH_SIZE})...",
+        flush=True,
+    )
+    decoded_responses = generate_formatted_batches(
+        tokenizer,
+        model,
+        formatted_prompts,
+        HARMBENCH_JUDGE_MAX_NEW_TOKENS,
+        HARMBENCH_JUDGE_BATCH_SIZE,
+        INFERENCE_POLICY["do_sample"],
+        INFERENCE_POLICY["temperature"],
+        progress_desc="harmbench-judge",
+    )
+    labels = [parse_attack_label(text).attack_success for text in decoded_responses]
 
     results: dict[str, list[dict]] = {}
     for (behavior_id, entry, _), label in zip(jobs, labels):

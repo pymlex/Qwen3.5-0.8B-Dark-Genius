@@ -20,11 +20,15 @@ def resolve_model_path(model_key: str, registry: dict, outputs_dir: Path) -> str
 
 
 def load_tokenizer(model_path: str, hf_token: str):
-    return AutoTokenizer.from_pretrained(
+    tokenizer = AutoTokenizer.from_pretrained(
         model_path,
         trust_remote_code=True,
         token=hf_token,
     )
+    tokenizer.padding_side = "left"
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    return tokenizer
 
 
 def load_generation_model(model_path: str, hf_token: str, dtype: torch.dtype = torch.float16):
@@ -43,6 +47,7 @@ def load_generation_model(model_path: str, hf_token: str, dtype: torch.dtype = t
             token=hf_token,
             torch_dtype=dtype,
             device_map="auto",
+            attn_implementation="sdpa",
         )
     return AutoModelForCausalLM.from_pretrained(
         model_path,
@@ -50,6 +55,7 @@ def load_generation_model(model_path: str, hf_token: str, dtype: torch.dtype = t
         token=hf_token,
         torch_dtype=dtype,
         device_map="auto",
+        attn_implementation="sdpa",
     )
 
 
