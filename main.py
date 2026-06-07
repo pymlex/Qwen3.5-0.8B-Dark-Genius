@@ -218,6 +218,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+    load_project_env(PROJECT_ROOT)
     args.func(args)
 
 
