@@ -271,7 +271,7 @@ python main.py run-all --push-hf --push-github
 
 ## Results
 
-Experiments target 1× RTX 5090 31.84 GB VRAM with CUDA 13.2. After `python main.py report`, numeric summaries appear under `results/metrics/`. The bar chart `results/figures/benchmark_comparison.png` contains three panels with four bars each: GPQA accuracy, GSM8K exact match, and HarmBench ASR. Model order is fixed: Instruct, Opus-Reasoning, DarkQwen, Dark-Genius.
+Experiments target 1× RTX 5090 31.84 GB VRAM with CUDA 13.2. After `python main.py report`, numeric summaries appear under `results/metrics/`. The bar chart `results/figures/benchmark_comparison.png` contains four panels with four bars each: GPQA accuracy, GSM8K exact match, HarmBench ASR, and refusal rate. Model order is fixed: Instruct, Opus-Reasoning, DarkQwen, Dark-Genius.
 
 | Model | GPQA accuracy | GSM8K exact match | HarmBench ASR | Refusal rate |
 | --- | ---: | ---: | ---: | ---: |

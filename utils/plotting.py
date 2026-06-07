@@ -46,6 +46,7 @@ def plot_benchmark_bars(summary_rows: list[dict], results_dir: Path) -> Path | N
         ("gpqa_accuracy", "GPQA accuracy"),
         ("gsm8k_exact_match", "GSM8K exact match"),
         ("harmbench_asr", "HarmBench ASR"),
+        ("refusal_rate", "Refusal rate"),
     ]
 
     available_specs = []
