@@ -1,3 +1,4 @@
+import gc
 import torch
 from tqdm.auto import tqdm
 
@@ -59,5 +60,6 @@ def generate_responses(
             responses.append(decoded.strip())
 
     del model
+    gc.collect()
     torch.cuda.empty_cache()
     return responses

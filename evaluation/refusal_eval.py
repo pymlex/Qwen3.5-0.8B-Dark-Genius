@@ -11,6 +11,7 @@ from constants import (
     REFUSAL_MARKERS,
     SYSTEM_PROMPT,
 )
+from evaluation.benchmark_status import is_refusal_done, load_summary, refusal_summary_path
 from utils.env_utils import require_hf_token
 from utils.inference import generate_responses
 from utils.model_loader import resolve_model_path
@@ -30,6 +31,10 @@ def is_refusal(response: str, markers: list[str]) -> bool:
 
 
 def run_refusal_eval(model_key: str, results_dir: Path, max_new_tokens: int = 100) -> dict:
+    summary_path = refusal_summary_path(results_dir, model_key)
+    if is_refusal_done(results_dir, model_key):
+        return load_summary(summary_path)
+
     hf_token = require_hf_token()
     model_path = resolve_model_path(model_key, MODEL_REGISTRY, results_dir.parent / "outputs")
     dataset = load_dataset(

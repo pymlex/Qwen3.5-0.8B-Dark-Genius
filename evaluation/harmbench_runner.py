@@ -14,7 +14,13 @@ from constants import (
     MODEL_REGISTRY,
     SYSTEM_PROMPT,
 )
-from evaluation.harmbench_classifier import classify_completions
+from evaluation.benchmark_status import (
+    harmbench_completions_path,
+    harmbench_summary_path,
+    is_harmbench_done,
+    load_summary,
+)
+from evaluation.harmbench_classifier import classify_completions, release_cuda_memory
 from utils.env_utils import require_hf_token
 from utils.inference import generate_responses
 from utils.model_loader import resolve_model_path
@@ -107,6 +113,7 @@ def evaluate_harmbench_completions(
         f"--completions_path {completions_path} "
         f"--save_path {results_path}"
     )
+    release_cuda_memory()
     classification = classify_completions(
         behaviors_path=behaviors_path(),
         completions_path=completions_path,
@@ -135,6 +142,13 @@ def evaluate_harmbench_completions(
 
 
 def run_harmbench_for_model(model_key: str, results_dir: Path) -> dict:
+    if is_harmbench_done(results_dir, model_key):
+        return load_summary(harmbench_summary_path(results_dir, model_key))
+
+    completions_path = harmbench_completions_path(results_dir, model_key)
+    if completions_path.exists():
+        return evaluate_harmbench_completions(model_key, completions_path, results_dir)
+
     generation_meta = generate_harmbench_completions(model_key, results_dir)
     return evaluate_harmbench_completions(
         model_key,

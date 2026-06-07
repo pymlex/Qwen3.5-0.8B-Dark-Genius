@@ -16,6 +16,11 @@ from constants import (
     PROJECT_ROOT,
     RESULTS_DIR,
 )
+from evaluation.benchmark_status import (
+    pending_harmbench_models,
+    pending_lm_eval_jobs,
+    pending_refusal_models,
+)
 from evaluation.hf_eval_export import export_hf_eval_artifacts
 from evaluation.aggregate import collect_summary_rows, write_run_report
 from evaluation.harmbench_runner import run_harmbench_for_model
@@ -100,15 +105,23 @@ def cmd_evaluate_refusal(args: argparse.Namespace) -> None:
 
 
 def cmd_evaluate(args: argparse.Namespace) -> None:
-    cmd_evaluate_lm(
-        argparse.Namespace(model=args.model, benchmark="all")
-    )
-    cmd_evaluate_harmbench(
-        argparse.Namespace(model=args.model)
-    )
-    cmd_evaluate_refusal(
-        argparse.Namespace(model=args.model)
-    )
+    model_keys = [args.model] if args.model else MODEL_ORDER
+    lm_jobs = pending_lm_eval_jobs(RESULTS_DIR, model_keys)
+    hb_models = pending_harmbench_models(RESULTS_DIR, model_keys)
+    refusal_models = pending_refusal_models(RESULTS_DIR, model_keys)
+
+    if lm_jobs:
+        cmd_evaluate_lm(
+            argparse.Namespace(model=args.model, benchmark="all")
+        )
+    if hb_models:
+        cmd_evaluate_harmbench(
+            argparse.Namespace(model=args.model)
+        )
+    if refusal_models:
+        cmd_evaluate_refusal(
+            argparse.Namespace(model=args.model)
+        )
 
 
 def cmd_plot(args: argparse.Namespace) -> None:
@@ -140,6 +153,12 @@ def cmd_push_hf(args: argparse.Namespace) -> None:
 
 def cmd_push_github(args: argparse.Namespace) -> None:
     push_results_to_github(PROJECT_ROOT, args.message)
+
+
+def cmd_publish(args: argparse.Namespace) -> None:
+    cmd_report(argparse.Namespace())
+    cmd_push_hf(argparse.Namespace())
+    cmd_push_github(argparse.Namespace(message=args.message))
 
 
 def cmd_run_all(args: argparse.Namespace) -> None:
@@ -214,6 +233,16 @@ def build_parser() -> argparse.ArgumentParser:
         default="Add benchmark results from RTX 5090 run",
     )
     push_gh_parser.set_defaults(func=cmd_push_github)
+
+    publish_parser = subparsers.add_parser(
+        "publish",
+        help="Report, upload model to HF, push results to GitHub",
+    )
+    publish_parser.add_argument(
+        "--message",
+        default="Publish Dark-Genius model and benchmark results",
+    )
+    publish_parser.set_defaults(func=cmd_publish)
 
     run_all_parser = subparsers.add_parser("run-all", help="Full pipeline")
     run_all_parser.add_argument("--browser", action="store_true")

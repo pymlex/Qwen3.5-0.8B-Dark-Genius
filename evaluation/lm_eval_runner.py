@@ -2,6 +2,7 @@ import subprocess
 from pathlib import Path
 
 from constants import LM_EVAL_TASKS, MODEL_REGISTRY
+from evaluation.benchmark_status import is_lm_eval_done, load_summary, lm_eval_summary_path
 from evaluation.gpqa_access import GPQA_ACCESS_URL, ensure_gpqa_access
 from evaluation.lm_eval_command import build_lm_eval_command
 from evaluation.lm_eval_output import (
@@ -21,6 +22,10 @@ def run_lm_eval_for_model(
     results_dir: Path,
     benchmark: str,
 ) -> dict:
+    summary_path = lm_eval_summary_path(results_dir, model_key, benchmark)
+    if is_lm_eval_done(results_dir, model_key, benchmark):
+        return load_summary(summary_path)
+
     hf_token = require_hf_token()
     if benchmark == "gpqa":
         ensure_gpqa_access(hf_token)
