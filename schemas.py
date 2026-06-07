@@ -59,7 +59,10 @@ class RunMetadata(BaseModel):
     merge_config: str
     inference_policy: InferencePolicy
     library_versions: dict[str, str]
-    hardware_note: str = "Google Colab L4 GPU"
+    hardware_note: str = (
+        "1× RTX 5090 31.84 GB VRAM, PCIe 1.0 x16, CUDA 13.2, "
+        "AMD Ryzen 9 9950X3D 16-Core 4.3 GHz, 64 GB RAM"
+    )
 
 
 class SummaryRow(BaseModel):

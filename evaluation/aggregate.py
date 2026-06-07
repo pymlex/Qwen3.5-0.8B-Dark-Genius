@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from constants import MODEL_ORDER, MODEL_REGISTRY
+from constants import HARDWARE_NOTE, MODEL_ORDER, MODEL_REGISTRY
 
 
 def load_json(path: Path) -> dict:
@@ -45,6 +45,7 @@ def collect_summary_rows(results_dir: Path) -> list[dict]:
 def write_run_report(results_dir: Path, library_versions: dict[str, str]) -> Path:
     summary_rows = collect_summary_rows(results_dir)
     report = {
+        "hardware": HARDWARE_NOTE,
         "models": summary_rows,
         "library_versions": library_versions,
     }

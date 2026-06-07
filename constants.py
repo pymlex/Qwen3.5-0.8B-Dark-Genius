@@ -9,6 +9,11 @@ HARMBENCH_DATA_DIR = PROJECT_ROOT / "data" / "harmbench"
 
 SEED = 42
 
+HARDWARE_NOTE = (
+    "1× RTX 5090 31.84 GB VRAM, PCIe 1.0 x16, CUDA 13.2, "
+    "AMD Ryzen 9 9950X3D 16-Core 4.3 GHz, 64 GB RAM"
+)
+
 BASE_MODEL_ID = "Qwen/Qwen3.5-0.8B"
 MERGE_OUTPUT_DIR = OUTPUTS_DIR / "merged" / "Qwen3.5-0.8B-Dark-Genius"
 MERGE_CONFIG_PATH = CONFIGS_DIR / "merge" / "dare_ties.yaml"

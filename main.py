@@ -151,7 +151,7 @@ def cmd_run_all(args: argparse.Namespace) -> None:
         cmd_push_hf(argparse.Namespace())
     if args.push_github:
         cmd_push_github(
-            argparse.Namespace(message="Add benchmark results from Colab L4 run")
+            argparse.Namespace(message="Add benchmark results from RTX 5090 run")
         )
 
 
@@ -211,7 +211,7 @@ def build_parser() -> argparse.ArgumentParser:
     push_gh_parser = subparsers.add_parser("push-github", help="Push results to GitHub")
     push_gh_parser.add_argument(
         "--message",
-        default="Add benchmark results from Colab L4 run",
+        default="Add benchmark results from RTX 5090 run",
     )
     push_gh_parser.set_defaults(func=cmd_push_github)
 

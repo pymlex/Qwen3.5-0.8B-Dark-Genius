@@ -1,6 +1,6 @@
 # Qwen3.5-0.8B-Dark-Genius
 
-End-to-end research pipeline for DARE-TIES model merging, benchmark evaluation, refusal-rate measurement, and publication of artefacts on Hugging Face and GitHub. Four Qwen3.5-0.8B-family checkpoints are compared under a fixed inference policy on Google Colab L4 GPU.
+End-to-end research pipeline for DARE-TIES model merging, benchmark evaluation, refusal-rate measurement, and publication of artefacts on Hugging Face and GitHub. Four Qwen3.5-0.8B-family checkpoints are compared under a fixed inference policy on 1× RTX 5090 with AMD Ryzen 9 9950X3D and 64 GB RAM.
 
 ## Overview
 
@@ -190,9 +190,9 @@ Qwen3.5-0.8B-Dark-Genius/
     └── merged/Qwen3.5-0.8B-Dark-Genius/
 ```
 
-## Google Colab L4 setup
+## Hardware and setup
 
-Runtime: Google Colab with NVIDIA L4 GPU, Python $3.10+$.
+Runtime: 1× RTX 5090 31.84 GB VRAM, PCIe 1.0 x16, CUDA 13.2, AMD Ryzen 9 9950X3D 16-Core 4.3 GHz, 64 GB RAM, Python $3.12$.
 
 ```bash
 git clone https://github.com/pymlex/Qwen3.5-0.8B-Dark-Genius.git
@@ -271,7 +271,7 @@ python main.py run-all --push-hf --push-github
 
 ## Results
 
-Experiments target Google Colab L4 GPU. After `python main.py report`, numeric summaries appear under `results/metrics/`. The bar chart `results/figures/benchmark_comparison.png` contains three panels with four bars each: GPQA accuracy, GSM8K exact match, and HarmBench ASR. Model order is fixed: Instruct, Opus-Reasoning, DarkQwen, Dark-Genius.
+Experiments target 1× RTX 5090 31.84 GB VRAM with CUDA 13.2. After `python main.py report`, numeric summaries appear under `results/metrics/`. The bar chart `results/figures/benchmark_comparison.png` contains three panels with four bars each: GPQA accuracy, GSM8K exact match, and HarmBench ASR. Model order is fixed: Instruct, Opus-Reasoning, DarkQwen, Dark-Genius.
 
 | Model | GPQA accuracy | GSM8K exact match | HarmBench ASR | Refusal rate |
 | --- | ---: | ---: | ---: | ---: |
@@ -280,7 +280,7 @@ Experiments target Google Colab L4 GPU. After `python main.py report`, numeric s
 | DarkQwen3.5-0.8B | — | — | — | — |
 | Qwen3.5-0.8B-Dark-Genius | — | — | — | — |
 
-Values populate after the Colab run. Raw completions, parsed metrics, merge metadata, and exact shell commands are stored under `results/raw/` and `results/metrics/`.
+Values populate after the evaluation run. Raw completions, parsed metrics, merge metadata, and exact shell commands are stored under `results/raw/` and `results/metrics/`.
 
 ## Inference
 
