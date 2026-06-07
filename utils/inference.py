@@ -1,7 +1,7 @@
 import torch
 from tqdm.auto import tqdm
 
-from utils.model_loader import load_causal_lm, load_tokenizer
+from utils.model_loader import load_generation_model, load_tokenizer
 
 
 def format_chat_prompt(tokenizer, user_text: str, system_prompt: str) -> str:
@@ -29,7 +29,7 @@ def generate_responses(
     batch_size: int = 4,
 ) -> list[str]:
     tokenizer = load_tokenizer(model_path, hf_token)
-    model = load_causal_lm(model_path, hf_token)
+    model = load_generation_model(model_path, hf_token)
     model.eval()
 
     torch.manual_seed(seed)

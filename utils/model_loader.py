@@ -1,9 +1,10 @@
 import json
 from pathlib import Path
 
+
 import torch
 from huggingface_hub import hf_hub_download
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoModelForImageTextToText, AutoTokenizer
 
 
 def resolve_model_path(model_key: str, registry: dict, outputs_dir: Path) -> str:
@@ -26,7 +27,23 @@ def load_tokenizer(model_path: str, hf_token: str):
     )
 
 
-def load_causal_lm(model_path: str, hf_token: str, dtype: torch.dtype = torch.float16):
+def load_generation_model(model_path: str, hf_token: str, dtype: torch.dtype = torch.float16):
+    config_path = Path(model_path) / "config.json"
+    if config_path.exists():
+        with open(config_path, encoding="utf-8") as handle:
+            config = json.load(handle)
+    else:
+        config = fetch_remote_config(model_path, hf_token)
+
+    architectures = config.get("architectures", [])
+    if "Qwen3_5ForConditionalGeneration" in architectures:
+        return AutoModelForImageTextToText.from_pretrained(
+            model_path,
+            trust_remote_code=True,
+            token=hf_token,
+            torch_dtype=dtype,
+            device_map="auto",
+        )
     return AutoModelForCausalLM.from_pretrained(
         model_path,
         trust_remote_code=True,
