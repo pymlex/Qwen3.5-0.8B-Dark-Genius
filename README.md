@@ -62,7 +62,7 @@ Let $\theta_b$ denote the shared base weights of Qwen/Qwen3.5-0.8B. For each fin
 
 $$\tau_i = \theta_i - \theta_b.$$
 
-DARE applies element-wise random pruning with retain probability $p_i$, equivalently drop rate $1 - p_i$, controlled by mergekit parameter `density`. Draw mask $m_i$ element-wise from Bernoulli$(p_i)$ and form the pruned vector
+DARE applies element-wise random pruning with retain probability $p_i$, equivalently drop rate $1 - p_i$, controlled by mergekit parameter `density`. Draw mask $m_i$ element-wise from Bernoulli $p_i$ and form the pruned vector
 
 $$\tau_i^{(d)} = \frac{m_i \odot \tau_i}{p_i}.$$
 
